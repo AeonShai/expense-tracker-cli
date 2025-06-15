@@ -1,4 +1,49 @@
 import argparse
+import json
+import os
+from datetime import datetime
+
+DATA_FILE = "expenses.json"
+
+#Load file
+def load_expenses():
+    if not os.path.exists(DATA_FILE):
+        return []
+    with open (DATA_FILE, "r") as f:
+        return json.load(f)
+
+#Save expenses
+def save_expenses(expenses):
+    with open (DATA_FILE, "w") as f:
+        json.dump(expenses, f, indent=4)
+
+#Add func
+def add_expense(description, amount):
+    expenses = load_expenses()
+    new_id = 1 if not expenses else max(e["id"] for e in expenses) + 1
+    today = datetime.now().strftime("%d-%m-%Y")
+    expense = {
+        "id": new_id,
+        "date": today,
+        "description": description,
+        "amount": amount
+    }
+    expenses.append(expense)
+    save_expenses(expenses)
+    print(f"Exppense successfully added (ID: {new_id})")
+
+#list func
+def list_expense():
+    expenses = load_expenses()
+    if not expenses:
+        print("Expenses not found")
+        return
+
+    print(f"{'ID':<4} {'Date':<12} {'Description':<25} {'Amount':>10}")
+    print("-" * 55)
+
+    for e in expenses:
+        print(f"{e['id']:<4} {e['date']:<12} {e['description']:<25} ${e['amount']:>8.2f}")
 
 def main():
     parser = argparse.ArgumentParser(prog="expense-tracker", description="Simple expense tracker")
@@ -20,10 +65,19 @@ def main():
     summary_parser = subparsers.add_parser("summary", help="Summary")
     summary_parser.add_argument("--month", type=int, help="Month filter")
 
-
     #args definition
     args = parser.parse_args()
     print(args)
+
+    if args.command == "add":
+        if args.amount < 0:
+            print("Amount can't be zero")
+            return
+        add_expense(args.description, args.amount)
+
+    elif args.command == "list":
+        list_expense()
+
 
 if __name__ == "__main__":
     main()
