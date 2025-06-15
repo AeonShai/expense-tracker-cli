@@ -45,6 +45,18 @@ def list_expense():
     for e in expenses:
         print(f"{e['id']:<4} {e['date']:<12} {e['description']:<25} ${e['amount']:>8.2f}")
 
+#delete func
+def delete_expense(expense_id):
+    expenses = load_expenses()
+    new_expenses = [e for e in expenses if e["id"] != expense_id]
+
+    if len(new_expenses) == len(expenses):
+        print(f"Error: ID {expense_id} not found.")
+        return
+    
+    save_expenses(new_expenses)
+    print("Expense successfully deleted.")
+
 def main():
     parser = argparse.ArgumentParser(prog="expense-tracker", description="Simple expense tracker")
     subparsers = parser.add_subparsers(dest="command", help="Commands")
@@ -77,6 +89,9 @@ def main():
 
     elif args.command == "list":
         list_expense()
+    
+    elif args.command == "delete":
+        delete_expense(args.id)
 
 
 if __name__ == "__main__":
