@@ -57,6 +57,29 @@ def delete_expense(expense_id):
     save_expenses(new_expenses)
     print("Expense successfully deleted.")
 
+#summary func
+def summary_expense(month=None):
+    expenses = load_expenses()
+    total = 0
+
+    for e in expenses:
+        try:
+            expense_date = datetime.strptime(e["date"], "%d-%m-%Y")
+        except ValueError:
+            print(f"Invalid date format: {e['date']}")
+            continue
+
+        if month:
+            if expense_date.month == month and expense_date.year == datetime.now().year:
+                total += e["amount"]
+        else:
+            total += e["amount"]
+
+    if month:
+        print(f"Summary for {month}: ${total:.2f}")
+    else:
+        print(f"Sum: ${total:.2f}")
+
 def main():
     parser = argparse.ArgumentParser(prog="expense-tracker", description="Simple expense tracker")
     subparsers = parser.add_subparsers(dest="command", help="Commands")
@@ -92,6 +115,15 @@ def main():
     
     elif args.command == "delete":
         delete_expense(args.id)
+    
+    elif args.command == "summary":
+        if args.month:
+            if not (1 <= args.month <= 12):
+                print("Error: Month should be in 1-12")
+                return
+            summary_expense(month=args.month)
+        else:
+            summary_expense()        
 
 
 if __name__ == "__main__":
