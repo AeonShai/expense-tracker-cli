@@ -2,9 +2,30 @@ import argparse
 import json
 import os
 from datetime import datetime
+import csv
 
 DATA_FILE = "expenses.json"
 BUDGET_FILE = "budget.json"
+
+def export_to_csv(filename="expenses.csv"):
+    expenses = load_expenses()
+    if not expenses:
+        print("Export failed: no expenses found.")
+        return
+
+    with open(filename, "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["ID", "Date", "Description", "Category", "Amount"])
+        for e in expenses:
+            writer.writerow([
+                e["id"],
+                e["date"],
+                e["description"],
+                e.get("category", "Expense"),
+                e["amount"]
+            ])
+    print(f"Expenses exported successfully to {filename}")
+
 
 def load_budgets():
     if not os.path.exists(BUDGET_FILE):
@@ -125,6 +146,10 @@ def main():
     budget_parser = subparsers.add_parser("set-budget", help="Set monthly budget")
     budget_parser.add_argument("--month", required=True, type=int, help="Month number (1-12)")
     budget_parser.add_argument("--amount", required=True, type=float, help="Budget amount for expense")
+
+    #export commaand
+    subparsers.add_parser("export", help="Export expenses to CSV")
+
     #args definition
     args = parser.parse_args()
     print(args)
@@ -157,6 +182,9 @@ def main():
         budgets[str(args.month)] = args.amount
         save_budgets(budgets)
         print(f"Bütçe ayarlandı: Ay {args.month} için ${args.amount:.2f}")
+    elif args.command == "export":
+        export_to_csv()
+
         
 
 
