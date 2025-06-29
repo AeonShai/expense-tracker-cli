@@ -18,7 +18,7 @@ def save_expenses(expenses):
         json.dump(expenses, f, indent=4)
 
 #Add func
-def add_expense(description, amount):
+def add_expense(description, amount, category=None):
     expenses = load_expenses()
     new_id = 1 if not expenses else max(e["id"] for e in expenses) + 1
     today = datetime.now().strftime("%d-%m-%Y")
@@ -26,7 +26,8 @@ def add_expense(description, amount):
         "id": new_id,
         "date": today,
         "description": description,
-        "amount": amount
+        "amount": amount,
+        "category": category or "Expense"
     }
     expenses.append(expense)
     save_expenses(expenses)
@@ -39,11 +40,11 @@ def list_expense():
         print("Expenses not found")
         return
 
-    print(f"{'ID':<4} {'Date':<12} {'Description':<25} {'Amount':>10}")
-    print("-" * 55)
+    print(f"{'ID':<4} {'Date':<12} {'Description':<25} {'Category':<15} {'Amount':>10}")
+    print("-" * 70)
 
     for e in expenses:
-        print(f"{e['id']:<4} {e['date']:<12} {e['description']:<25} ${e['amount']:>8.2f}")
+        print(f"{e['id']:<4} {e['date']:<12} {e['description']:<25} {e.get('category', 'Expense'):<15} ${e['amount']:>8.2f}")
 
 #delete func
 def delete_expense(expense_id):
@@ -100,6 +101,9 @@ def main():
     summary_parser = subparsers.add_parser("summary", help="Summary")
     summary_parser.add_argument("--month", type=int, help="Month filter")
 
+    #category command
+    add_parser.add_argument("--category", required=False, help="Category (exp: Food,Travel, etc...)")
+
     #args definition
     args = parser.parse_args()
     print(args)
@@ -108,7 +112,7 @@ def main():
         if args.amount < 0:
             print("Amount can't be zero")
             return
-        add_expense(args.description, args.amount)
+        add_expense(args.description, args.amount, args.category)
 
     elif args.command == "list":
         list_expense()
