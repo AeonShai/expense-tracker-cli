@@ -1,6 +1,6 @@
 # 💸 Expense Tracker CLI
 
-A simple and intuitive command-line tool for tracking your personal expenses.
+A simple and intuitive command-line tool for tracking your personal expenses. Project source: https://roadmap.sh/projects/expense-tracker
 
 ## 🚀 Features
 
@@ -15,7 +15,7 @@ A simple and intuitive command-line tool for tracking your personal expenses.
 Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/expense-tracker-cli.git
+git clone https://github.com/AeonShai/expense-tracker-cli.git
 cd expense-tracker-cli
 ```
 
