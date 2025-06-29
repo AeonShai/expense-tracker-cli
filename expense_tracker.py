@@ -4,7 +4,20 @@ import os
 from datetime import datetime
 
 DATA_FILE = "expenses.json"
+BUDGET_FILE = "budget.json"
 
+def load_budgets():
+    if not os.path.exists(BUDGET_FILE):
+        return {}
+    with open (BUDGET_FILE, "r") as f:
+        try:
+            return json.load(f)
+        except json.JSONDecodeError:
+            return {}
+
+def save_budgets(budgets):
+    with open(BUDGET_FILE, "w") as f:
+        json.dump(budgets, f, indent=4)
 #Load file
 def load_expenses():
     if not os.path.exists(DATA_FILE):
@@ -78,6 +91,10 @@ def summary_expense(month=None):
 
     if month:
         print(f"Summary for {month}: ${total:.2f}")
+        budgets = load_budgets()
+        budget_amount = budgets.get(str(month))
+        if budget_amount and total > budget_amount:
+            print(f"Warn: Your budget for {month} is limited.")
     else:
         print(f"Sum: ${total:.2f}")
 
@@ -104,6 +121,10 @@ def main():
     #category command
     add_parser.add_argument("--category", required=False, help="Category (exp: Food,Travel, etc...)")
 
+    #budget command
+    budget_parser = subparsers.add_parser("set-budget", help="Set monthly budget")
+    budget_parser.add_argument("--month", required=True, type=int, help="Month number (1-12)")
+    budget_parser.add_argument("--amount", required=True, type=float, help="Budget amount for expense")
     #args definition
     args = parser.parse_args()
     print(args)
@@ -127,7 +148,16 @@ def main():
                 return
             summary_expense(month=args.month)
         else:
-            summary_expense()        
+            summary_expense()
+    elif args.command == "set-budget":
+        if not (1 <= args.month <= 12):
+            print("Error: Month must be between 1 and 12")
+            return
+        budgets = load_budgets()
+        budgets[str(args.month)] = args.amount
+        save_budgets(budgets)
+        print(f"Bütçe ayarlandı: Ay {args.month} için ${args.amount:.2f}")
+        
 
 
 if __name__ == "__main__":
